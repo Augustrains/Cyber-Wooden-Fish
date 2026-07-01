@@ -2258,7 +2258,25 @@
       triggerHit();
       
       if (petMode === 'improve') {
-        handleTripleClick();
+        clickCount++;
+
+        if (clickCount === 1) {
+          petBadge.style.display = 'flex';
+          petBadge.textContent = 2;
+          clickTimer = setTimeout(() => {
+            clickCount = 0;
+            petBadge.style.display = 'none';
+          }, TRIPLE_CLICK_WINDOW);
+        } else if (clickCount === 2) {
+          petBadge.textContent = 1;
+        }
+
+        if (clickCount >= 3) {
+          clickCount = 0;
+          petBadge.style.display = 'none';
+          if (clickTimer) clearTimeout(clickTimer);
+          handleTripleClick();
+        }
       }
     });
 
