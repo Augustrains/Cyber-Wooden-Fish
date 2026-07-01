@@ -1505,6 +1505,33 @@
       opacity: 1;
     }
 
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+      
+      .pet-float {
+        bottom: 20px;
+        right: 20px;
+        transform: scale(0.9);
+      }
+      
+      .improvement-panel {
+        width: 90vw;
+        height: 70vh;
+      }
+      
+      .task-box {
+        width: 90vw;
+        max-width: 360px;
+      }
+      
+      .settings-modal .modal-box {
+        width: 90vw;
+        max-width: 400px;
+      }
+    }
+
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
       10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
