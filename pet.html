@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CC Punch - 赛博木鱼</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Courier New", monospace;
+      background: #0a0a0f;
+      color: #00f5ff;
+      user-select: none;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .container {
+      width: 320px;
+      height: 560px;
+      background: linear-gradient(180deg, #0d0d1a 0%, #1a1a2e 100%);
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(90deg, #1a1a2e, #2a2a4a, #1a1a2e);
+      padding: 12px;
+      color: #00f5ff;
+      font-size: 13px;
+      text-align: center;
+      border-bottom: 1px solid #00f5ff33;
+      letter-spacing: 3px;
+      text-shadow: 0 0 10px #00f5ff80;
+      font-weight: bold;
+    }
+
+    .pet-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      position: relative;
+      height: calc(100% - 45px);
+    }
+
+    .fish-wrapper {
+      position: relative;
+      width: 160px;
+      height: 160px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .fish-wrapper:active {
+      transform: scale(0.98);
+    }
+
+    .fish {
+      width: 140px;
+      height: 110px;
+      position: relative;
+      transition: transform 0.08s ease-out;
+    }
+
+    .fish.hit {
+      animation: fishHit 0.2s ease-out;
+    }
+
+    @keyframes fishHit {
+      0% { transform: translateY(0) scaleY(1); }
+      30% { transform: translateY(5px) scaleY(0.92); }
+      60% { transform: translateY(-2px) scaleY(1.03); }
+      100% { transform: translateY(0) scaleY(1); }
+    }
+
+    .fish-body {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #2a2a4a 0%, #1a1a2e 50%, #0f0f1f 100%);
+      border-radius: 50% 50% 45% 45% / 55% 55% 45% 45%;
+      position: relative;
+      border: 2px solid #00f5ff;
+      box-shadow:
+        0 0 20px #00f5ff40,
+        inset 0 0 30px #00f5ff15,
+        0 8px 16px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+
+    .fish-body::before {
+      content: '';
+      position: absolute;
+      top: 15%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 45%;
+      background: radial-gradient(ellipse, #ff00ff22 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .fish-body::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      border-radius: 50% 50% 45% 45% / 55% 55% 45% 45%;
+      background:
+        repeating-linear-gradient(90deg, transparent 0px, transparent 10px, #00f5ff08 10px, #00f5ff08 11px),
+        repeating-linear-gradient(0deg, transparent 0px, transparent 10px, #ff00ff08 10px, #ff00ff08 11px);
+      pointer-events: none;
+    }
+
+    .fish-mouth {
+      position: absolute;
+      bottom: 22%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 36px;
+      height: 18px;
+      background: #0a0a15;
+      border-radius: 0 0 36px 36px;
+      border: 2px solid #ff00ff;
+      border-top: none;
+      box-shadow: 0 0 15px #ff00ff60, inset 0 -5px 10px #ff00ff30;
+    }
+
+    .fish-eye {
+      position: absolute;
+      top: 28%;
+      width: 18px;
+      height: 18px;
+      background: #0a0a15;
+      border-radius: 50%;
+      border: 2px solid #00f5ff;
+      box-shadow: 0 0 10px #00f5ff80, inset 0 0 8px #00f5ff40;
+    }
+
+    .fish-eye.left { left: 22%; }
+    .fish-eye.right { right: 22%; }
+
+    .fish-eye::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 4px;
+      width: 5px;
+      height: 5px;
+      background: #00f5ff;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #00f5ff;
+    }
+
+    .fish-fin {
+      position: absolute;
+      top: 50%;
+      width: 18px;
+      height: 35px;
+      background: linear-gradient(135deg, #2a2a4a, #1a1a2e);
+      border: 2px solid #ff00ff;
+      box-shadow: 0 0 12px #ff00ff40;
+    }
+
+    .fish-fin.left { left: -8px; border-radius: 18px 0 0 18px; transform: translateY(-50%) rotate(-10deg); }
+    .fish-fin.right { right: -8px; border-radius: 0 18px 18px 0; transform: translateY(-50%) rotate(10deg); }
+
+    .fish-tail {
+      position: absolute;
+      right: -15px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 22px solid #1a1a2e;
+      border-top: 17px solid transparent;
+      border-bottom: 17px solid transparent;
+      filter: drop-shadow(0 0 8px #00f5ff60);
+    }
+
+    .fish-tail::before {
+      content: '';
+      position: absolute;
+      right: 3px;
+      top: -13px;
+      width: 0;
+      height: 0;
+      border-left: 17px solid #00f5ff40;
+      border-top: 13px solid transparent;
+      border-bottom: 13px solid transparent;
+    }
+
+    .fish-glow-lines {
+      position: absolute;
+      top: 40%;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #00f5ff, #ff00ff, #00f5ff, transparent);
+      box-shadow: 0 0 10px #00f5ff;
+      opacity: 0.6;
+    }
+
+    .fish-glow-lines.line2 {
+      top: 55%;
+      opacity: 0.4;
+      background: linear-gradient(90deg, transparent, #ff00ff, #00f5ff, #ff00ff, transparent);
+    }
+
+    .fish-idle {
+      animation: fishIdle 3s ease-in-out infinite;
+    }
+
+    @keyframes fishIdle {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      25% { transform: translateY(-3px) rotate(1deg); }
+      75% { transform: translateY(2px) rotate(-1deg); }
+    }
+
+    .stick-container {
+      position: absolute;
+      top: -15px;
+      right: -5px;
+      width: 70px;
+      height: 70px;
+      pointer-events: none;
+      transform-origin: bottom left;
+      transform: rotate(-30deg);
+      transition: transform 0.1s ease-out;
+      z-index: 10;
+    }
+
+    .stick-container.hit {
+      animation: stickHit 0.2s ease-out;
+    }
+
+    @keyframes stickHit {
+      0% { transform: rotate(-30deg); }
+      40% { transform: rotate(20deg); }
+      70% { transform: rotate(-20deg); }
+      100% { transform: rotate(-30deg); }
+    }
+
+    .stick {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 7px;
+      height: 52px;
+      background: linear-gradient(180deg, #ff6b00 0%, #ff00aa 100%);
+      border-radius: 4px;
+      transform-origin: bottom center;
+      box-shadow: 0 0 15px #ff00aa80, 0 0 25px #ff6b0060;
+    }
+
+    .stick-head {
+      position: absolute;
+      top: -7px;
+      left: -9px;
+      width: 25px;
+      height: 25px;
+      background: radial-gradient(circle, #ffaa00 0%, #ff6b00 60%, #ff0055 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 20px #ffaa0080, 0 0 30px #ff6b0060, inset 0 2px 4px rgba(255,255,255,0.4);
+    }
+
+    .ripple {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      border: 2px solid #00f5ff;
+      border-radius: 50%;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .ripple.active {
+      animation: rippleExpand 0.5s ease-out forwards;
+    }
+
+    @keyframes rippleExpand {
+      0% { width: 20px; height: 20px; opacity: 1; border-color: #00f5ff; }
+      100% { width: 150px; height: 150px; opacity: 0; border-color: #ff00ff; }
+    }
+
+    .particle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: #00f5ff;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .particle.active {
+      animation: particleFly 0.6s ease-out forwards;
+    }
+
+    @keyframes particleFly {
+      0% { opacity: 1; transform: translate(0, 0) scale(1); }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
+    }
+
+    .counter-display {
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    .counter-label {
+      font-size: 9px;
+      color: #00f5ff80;
+      letter-spacing: 2px;
+      margin-bottom: 3px;
+    }
+
+    .counter-number {
+      font-size: 22px;
+      font-weight: bold;
+      color: #00f5ff;
+      text-shadow: 0 0 12px #00f5ff80;
+      font-family: 'Courier New', monospace;
+    }
+
+    .counter-sub {
+      font-size: 9px;
+      color: #ff00ff80;
+      margin-top: 3px;
+    }
+
+    .message-bubble {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-10px);
+      background: linear-gradient(135deg, #1a1a2e, #0f0f1f);
+      border: 1px solid #00f5ff;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 10px;
+      color: #00f5ff;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+      z-index: 100;
+      max-width: 260px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      box-shadow: 0 0 20px #00f5ff30, inset 0 0 20px #00f5ff08;
+    }
+
+    .message-bubble.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .message-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      width: 8px;
+      height: 8px;
+      background: #0f0f1f;
+      border-right: 1px solid #00f5ff;
+      border-bottom: 1px solid #00f5ff;
+    }
+
+    .improvement-panel {
+      position: absolute;
+      top: 60px;
+      left: 10px;
+      right: 10px;
+      background: linear-gradient(180deg, #0f0f1f 0%, #1a1a2e 100%);
+      border: 1px solid #00f5ff;
+      border-radius: 6px;
+      display: none;
+      flex-direction: column;
+      z-index: 200;
+      max-height: calc(100% - 80px);
+      box-shadow: 0 0 30px #00f5ff20, inset 0 0 30px #00f5ff05;
+    }
+
+    .improvement-panel.show {
+      display: flex;
+    }
+
+    .panel-header {
+      padding: 12px 14px 10px;
+      font-size: 12px;
+      background: linear-gradient(90deg, #00f5ff15, #ff00ff15, #00f5ff15);
+      color: #00f5ff;
+      border-bottom: 1px solid #00f5ff30;
+      text-align: center;
+      letter-spacing: 3px;
+      position: relative;
+      text-shadow: 0 0 10px #00f5ff80;
+    }
+
+    .panel-body {
+      flex: 1;
+      padding: 14px 16px;
+      overflow-y: auto;
+      font-size: 11px;
+      line-height: 1.9;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #e0e0ff;
+      border-bottom: 1px solid #00f5ff20;
+      min-height: 120px;
+      max-height: 280px;
+    }
+
+    .panel-body::-webkit-scrollbar { width: 8px; }
+    .panel-body::-webkit-scrollbar-track { background: #0a0a15; }
+    .panel-body::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #00f5ff80, #ff00ff80); border-radius: 4px; }
+
+    .panel-original {
+      background: #0a0a15;
+      border: 1px solid #2a2a4a;
+      padding: 10px;
+      margin-bottom: 12px;
+      font-size: 10px;
+      color: #8888aa;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .panel-original .label {
+      font-weight: bold;
+      margin-bottom: 4px;
+      color: #00f5ff80;
+    }
+
+    .panel-original.collapsed .content {
+      display: none;
+    }
+
+    .panel-footer {
+      display: flex;
+      gap: 6px;
+      padding: 12px;
+      background: #0a0a15;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 10px 0;
+      border: 1px solid;
+      font-family: inherit;
+      font-size: 11px;
+      cursor: pointer;
+      color: #fff;
+      position: relative;
+      background: linear-gradient(180deg, #1a1a2e, #0f0f1f);
+      border-radius: 4px;
+      transition: all 0.2s;
+      letter-spacing: 1px;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(1px); }
+
+    .btn-copy { border-color: #00f5ff; color: #00f5ff; box-shadow: 0 0 10px #00f5ff30, inset 0 0 10px #00f5ff10; }
+    .btn-good { border-color: #00ff88; color: #00ff88; box-shadow: 0 0 10px #00ff8830, inset 0 0 10px #00ff8810; }
+    .btn-bad { border-color: #ff00aa; color: #ff00aa; box-shadow: 0 0 10px #ff00aa30, inset 0 0 10px #ff00aa10; }
+
+    .close-btn {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      width: 22px;
+      height: 22px;
+      background: #0f0f1f;
+      border: 1px solid #ff00aa;
+      color: #ff00aa;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      z-index: 10;
+      border-radius: 4px;
+      box-shadow: 0 0 10px #ff00aa30;
+    }
+
+    .close-btn:hover { background: #ff00aa20; }
+
+    .hint {
+      position: absolute;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #00f5ff40;
+      font-size: 10px;
+      text-align: center;
+      width: 100%;
+      letter-spacing: 1px;
+    }
+
+    .scan-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #00f5ff, transparent);
+      opacity: 0.5;
+      animation: scanMove 4s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes scanMove {
+      0% { top: 0; opacity: 0; }
+      10% { opacity: 0.5; }
+      90% { opacity: 0.5; }
+      100% { top: 100%; opacity: 0; }
+    }
+
+    .status-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 20px;
+      background: #0a0a15;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      color: #00f5ff60;
+      gap: 10px;
+      border-top: 1px solid #2a2a4a;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #00ff88;
+      box-shadow: 0 0 6px #00ff88;
+    }
+
+    .status-dot.offline {
+      background: #ff00aa;
+      box-shadow: 0 0 6px #ff00aa;
+    }
+
+    .settings-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 28px;
+      height: 28px;
+      background: transparent;
+      border: 1px solid #00f5ff50;
+      color: #00f5ff;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: all 0.2s;
+    }
+
+    .settings-btn:hover {
+      border-color: #00f5ff;
+      background: #00f5ff10;
+      box-shadow: 0 0 10px #00f5ff30;
+    }
+
+    .settings-panel {
+      position: absolute;
+      top: 50px;
+      left: 10px;
+      right: 10px;
+      background: linear-gradient(180deg, #0f0f1f 0%, #1a1a2e 100%);
+      border: 1px solid #00f5ff;
+      border-radius: 6px;
+      display: none;
+      flex-direction: column;
+      z-index: 250;
+      max-height: calc(100% - 70px);
+      box-shadow: 0 0 30px #00f5ff20, inset 0 0 30px #00f5ff05;
+    }
+
+    .settings-panel.show {
+      display: flex;
+    }
+
+    .settings-header {
+      padding: 10px 12px 8px;
+      font-size: 11px;
+      background: linear-gradient(90deg, #00f5ff15, #ff00ff15, #00f5ff15);
+      color: #00f5ff;
+      border-bottom: 1px solid #00f5ff30;
+      text-align: center;
+      letter-spacing: 2px;
+      position: relative;
+    }
+
+    .settings-body {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      font-size: 10px;
+      color: #e0e0ff;
+    }
+
+    .settings-section {
+      margin-bottom: 16px;
+    }
+
+    .settings-section-title {
+      font-size: 10px;
+      color: #ff00ff;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+      text-shadow: 0 0 8px #ff00ff60;
+    }
+
+    .settings-label {
+      display: block;
+      font-size: 9px;
+      color: #00f5ff80;
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+    }
+
+    .settings-input {
+      width: 100%;
+      padding: 8px 10px;
+      background: #0a0a15;
+      border: 1px solid #2a2a4a;
+      border-radius: 4px;
+      color: #e0e0ff;
+      font-size: 10px;
+      font-family: inherit;
+      margin-bottom: 8px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .settings-input:focus {
+      border-color: #00f5ff;
+      box-shadow: 0 0 8px #00f5ff30;
+    }
+
+    .settings-textarea {
+      resize: vertical;
+      min-height: 60px;
+      font-family: inherit;
+    }
+
+    .settings-footer {
+      display: flex;
+      gap: 6px;
+      padding: 10px;
+      background: #0a0a15;
+      border-top: 1px solid #00f5ff20;
+    }
+
+    .settings-btn-save {
+      flex: 1;
+      padding: 8px 0;
+      border: 1px solid #00ff88;
+      background: transparent;
+      color: #00ff88;
+      font-family: inherit;
+      font-size: 10px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s;
+      letter-spacing: 1px;
+    }
+
+    .settings-btn-save:hover {
+      background: #00ff8820;
+      box-shadow: 0 0 10px #00ff8830;
+    }
+
+    .settings-btn-close {
+      padding: 8px 14px;
+      border: 1px solid #ff00aa;
+      background: transparent;
+      color: #ff00aa;
+      font-family: inherit;
+      font-size: 10px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s;
+      letter-spacing: 1px;
+    }
+
+    .settings-btn-close:hover {
+      background: #ff00aa20;
+      box-shadow: 0 0 10px #ff00aa30;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">⚡ 赛博木鱼 ⚡</div>
+    <button class="settings-btn" onclick="toggleSettings()" title="设置">⚙</button>
+    <div class="scan-line"></div>
+
+    <div class="pet-container">
+      <div class="message-bubble" id="messageBubble"></div>
+
+      <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header">⚙ 设 置</div>
+        <div class="settings-body">
+          <div class="settings-section">
+            <div class="settings-section-title">API 配置</div>
+            <label class="settings-label">API 地址</label>
+            <input type="text" class="settings-input" id="apiBaseInput" placeholder="https://api.deepseek.com/anthropic">
+            <label class="settings-label">API Key</label>
+            <input type="password" class="settings-input" id="apiKeyInput" placeholder="输入你的 API Key">
+            <label class="settings-label">模型名称</label>
+            <input type="text" class="settings-input" id="modelInput" placeholder="deepseek-chat">
+          </div>
+          <div class="settings-section">
+            <div class="settings-section-title">手动输入对话（测试用）</div>
+            <label class="settings-label">原始问题</label>
+            <textarea class="settings-input settings-textarea" id="testPromptInput" placeholder="你问 AI 的问题..."></textarea>
+            <label class="settings-label">AI 回答（你不满意的）</label>
+            <textarea class="settings-input settings-textarea" id="testResponseInput" placeholder="AI 的回答内容..."></textarea>
+          </div>
+        </div>
+        <div class="settings-footer">
+          <button class="settings-btn-close" onclick="toggleSettings()">关闭</button>
+          <button class="settings-btn-save" onclick="saveSettings()">保存设置</button>
+        </div>
+      </div>
+
+      <div class="improvement-panel" id="improvementPanel">
+        <div class="panel-header" id="panelHeader">改进提示词</div>
+        <button class="close-btn" onclick="closePanel()">×</button>
+        <div class="panel-body" id="panelBody">
+          <div class="panel-original collapsed" id="originalSection" onclick="toggleOriginal()">
+            <div class="label">▶ 原始对话（点击展开）</div>
+            <div class="content" id="originalContent"></div>
+          </div>
+          <div id="improvedContent"></div>
+        </div>
+        <div class="panel-footer">
+          <button class="btn btn-copy" onclick="copyPrompt()">复制</button>
+          <button class="btn btn-good" onclick="markSatisfied()">满意</button>
+          <button class="btn btn-bad" onclick="markDissatisfied()">不满</button>
+        </div>
+      </div>
+
+      <div class="fish-wrapper" id="fishWrapper" title="点击敲击木鱼">
+        <div class="ripple" id="ripple1"></div>
+        <div class="ripple" id="ripple2"></div>
+        <div class="ripple" id="ripple3"></div>
+
+        <div class="stick-container" id="stickContainer">
+          <div class="stick">
+            <div class="stick-head"></div>
+          </div>
+        </div>
+
+        <div class="fish fish-idle" id="fish">
+          <div class="fish-body">
+            <div class="fish-eye left"></div>
+            <div class="fish-eye right"></div>
+            <div class="fish-glow-lines"></div>
+            <div class="fish-glow-lines line2"></div>
+            <div class="fish-mouth"></div>
+            <div class="fish-fin left"></div>
+            <div class="fish-fin right"></div>
+          </div>
+          <div class="fish-tail"></div>
+        </div>
+      </div>
+
+      <div class="counter-display">
+        <div class="counter-label">敲 击 次 数</div>
+        <div class="counter-number" id="counterNum">0000</div>
+        <div class="counter-sub">连击 3 次触发提示词改进</div>
+      </div>
+    </div>
+
+    <div class="status-bar">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">等待连接...</span>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:3366';
+
+    let clickCount = 0;
+    let clickTimer = null;
+    let messageTimer = null;
+    let totalHits = 0;
+    let attemptCount = 0;
+    let previousImprovements = [];
+    const TRIPLE_CLICK_WINDOW = 1500;
+
+    const fish = document.getElementById('fish');
+    const fishWrapper = document.getElementById('fishWrapper');
+    const stickContainer = document.getElementById('stickContainer');
+    const messageBubble = document.getElementById('messageBubble');
+    const improvementPanel = document.getElementById('improvementPanel');
+    const panelHeader = document.getElementById('panelHeader');
+    const improvedContent = document.getElementById('improvedContent');
+    const originalContent = document.getElementById('originalContent');
+    const originalSection = document.getElementById('originalSection');
+    const counterNum = document.getElementById('counterNum');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+
+    async function fetchStatus() {
+      try {
+        const res = await fetch(`${API_BASE}/api/status`);
+        const data = await res.json();
+        totalHits = data.hitCount || 0;
+        updateCounter();
+        
+        statusDot.classList.remove('offline');
+        statusText.textContent = `对话: ${data.conversationCount} 条`;
+      } catch {
+        statusDot.classList.add('offline');
+        statusText.textContent = '服务器离线';
+      }
+    }
+
+    setInterval(fetchStatus, 3000);
+    fetchStatus();
+
+    function updateCounter() {
+      counterNum.textContent = String(totalHits).padStart(4, '0');
+    }
+
+    function showMessage(text, duration = 2000) {
+      messageBubble.textContent = text;
+      messageBubble.classList.add('show');
+      if (messageTimer) clearTimeout(messageTimer);
+      messageTimer = setTimeout(() => messageBubble.classList.remove('show'), duration);
+    }
+
+    async function triggerHit() {
+      totalHits++;
+      updateCounter();
+
+      fish.classList.remove('hit');
+      void fish.offsetWidth;
+      fish.classList.add('hit');
+
+      stickContainer.classList.remove('hit');
+      void stickContainer.offsetWidth;
+      stickContainer.classList.add('hit');
+
+      const rippleId = 'ripple' + ((totalHits % 3) + 1);
+      const ripple = document.getElementById(rippleId);
+      if (ripple) {
+        ripple.classList.remove('active');
+        void ripple.offsetWidth;
+        ripple.classList.add('active');
+      }
+
+      const count = 6;
+      for (let i = 0; i < count; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
+        const distance = 30 + Math.random() * 40;
+        const tx = Math.cos(angle) * distance;
+        const ty = Math.sin(angle) * distance;
+        particle.style.setProperty('--tx', tx + 'px');
+        particle.style.setProperty('--ty', ty + 'px');
+        const colors = ['#00f5ff', '#ff00ff', '#00ff88', '#ffaa00'];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        particle.style.background = color;
+        particle.style.boxShadow = '0 0 5px ' + color;
+        particle.style.left = '50%';
+        particle.style.top = '50%';
+        fishWrapper.appendChild(particle);
+        requestAnimationFrame(() => particle.classList.add('active'));
+        setTimeout(() => particle.remove(), 600);
+      }
+
+      try {
+        await fetch(`${API_BASE}/api/hit`, { method: 'POST' });
+      } catch {}
+    }
+
+    fishWrapper.addEventListener('click', () => {
+      triggerHit();
+      clickCount++;
+
+      if (clickCount === 1) {
+        clickTimer = setTimeout(() => clickCount = 0, TRIPLE_CLICK_WINDOW);
+      }
+
+      if (clickCount >= 3) {
+        clickCount = 0;
+        if (clickTimer) clearTimeout(clickTimer);
+        handleTripleClick();
+      }
+    });
+
+    async function handleTripleClick() {
+      showMessage('智能分析中...', 1500);
+
+      try {
+        const res = await fetch(`${API_BASE}/api/latest-turn`);
+        const turn = await res.json();
+
+        if (!turn) {
+          showMessage('暂无对话记录', 2500);
+          return;
+        }
+
+        attemptCount = 0;
+        previousImprovements = [];
+
+        await generateImprovement(turn.prompt, turn.response);
+      } catch (e) {
+        showMessage('获取对话失败', 2500);
+      }
+    }
+
+    async function generateImprovement(prompt, response) {
+      showMessage('生成改进提示词...', 1500);
+
+      try {
+        const res = await fetch(`${API_BASE}/api/improve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt,
+            response,
+            attempt: attemptCount,
+            previousImprovement: previousImprovements[previousImprovements.length - 1]
+          })
+        });
+
+        const result = await res.json();
+
+        if (result.success && result.improvedPrompt) {
+          previousImprovements.push(result.improvedPrompt);
+          showImprovementPanel(result.improvedPrompt, attemptCount + 1, prompt, response);
+          
+          try {
+            await navigator.clipboard.writeText(result.improvedPrompt);
+          } catch {}
+        } else {
+          showMessage(result.message || '生成失败', 3000);
+        }
+      } catch (e) {
+        showMessage('API 请求失败', 3000);
+      }
+    }
+
+    function showImprovementPanel(prompt, attempt, originalPrompt, originalResponse) {
+      improvedContent.textContent = prompt;
+      originalContent.textContent = '问题：' + originalPrompt + '\n\n回答：' + originalResponse;
+      panelHeader.textContent = attempt > 1 ? '改进提示词 (第 ' + attempt + ' 次)' : '改进提示词';
+      improvementPanel.classList.add('show');
+      fishWrapper.style.display = 'none';
+      counterNum.parentElement.style.display = 'none';
+    }
+
+    function hideImprovementPanel() {
+      improvementPanel.classList.remove('show');
+      fishWrapper.style.display = 'flex';
+      counterNum.parentElement.style.display = 'block';
+    }
+
+    function toggleOriginal() {
+      originalSection.classList.toggle('collapsed');
+      const label = originalSection.querySelector('.label');
+      if (label) {
+        label.textContent = originalSection.classList.contains('collapsed')
+          ? '▶ 原始对话（点击展开）'
+          : '▼ 原始对话（点击收起）';
+      }
+    }
+
+    async function copyPrompt() {
+      const text = improvedContent.textContent || '';
+      try {
+        await navigator.clipboard.writeText(text);
+        showMessage('已复制到剪贴板', 1500);
+      } catch {
+        showMessage('复制失败', 1500);
+      }
+    }
+
+    function markSatisfied() {
+      hideImprovementPanel();
+      showMessage('已确认改进结果', 2000);
+      attemptCount = 0;
+    }
+
+    function markDissatisfied() {
+      if (attemptCount >= 4) {
+        hideImprovementPanel();
+        showMessage('已达到最大改进次数', 3000);
+        attemptCount = 0;
+        return;
+      }
+
+      attemptCount++;
+      hideImprovementPanel();
+      showMessage('重新生成中...', 1500);
+
+      setTimeout(async () => {
+        try {
+          const res = await fetch(`${API_BASE}/api/latest-turn`);
+          const turn = await res.json();
+          if (turn) {
+            await generateImprovement(turn.prompt, turn.response);
+          }
+        } catch {}
+      }, 1500);
+    }
+
+    function closePanel() {
+      hideImprovementPanel();
+      attemptCount = 0;
+    }
+
+    const settingsPanel = document.getElementById('settingsPanel');
+    const apiBaseInput = document.getElementById('apiBaseInput');
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const modelInput = document.getElementById('modelInput');
+    const testPromptInput = document.getElementById('testPromptInput');
+    const testResponseInput = document.getElementById('testResponseInput');
+
+    function toggleSettings() {
+      settingsPanel.classList.toggle('show');
+      if (settingsPanel.classList.contains('show')) {
+        loadSettings();
+      }
+    }
+
+    async function loadSettings() {
+      try {
+        const res = await fetch(`${API_BASE}/api/config`);
+        const config = await res.json();
+        if (config.apiBase) apiBaseInput.value = config.apiBase;
+        if (config.model) modelInput.value = config.model;
+      } catch {}
+    }
+
+    async function saveSettings() {
+      const apiBase = apiBaseInput.value.trim();
+      const apiKey = apiKeyInput.value.trim();
+      const model = modelInput.value.trim();
+
+      try {
+        await fetch(`${API_BASE}/api/config`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ apiBase, apiKey, model })
+        });
+
+        const testPrompt = testPromptInput.value.trim();
+        const testResponse = testResponseInput.value.trim();
+
+        if (testPrompt && testResponse) {
+          await fetch(`${API_BASE}/api/conversations`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionId: 'manual-' + Date.now(),
+              prompt: testPrompt,
+              response: testResponse,
+              promptAt: Date.now(),
+              responseAt: Date.now()
+            })
+          });
+        }
+
+        showMessage('设置已保存', 2000);
+        settingsPanel.classList.remove('show');
+        fetchStatus();
+      } catch {
+        showMessage('保存失败', 2000);
+      }
+    }
+  </script>
+</body>
+</html>
